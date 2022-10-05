@@ -1,0 +1,8 @@
+packages:
+  - name: sample
+    functions:
+      - name: hello
+        binary: false
+        main: ''
+        runtime: 'go:default'
+        web: true
