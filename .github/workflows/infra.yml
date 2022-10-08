@@ -10,6 +10,9 @@ jobs:
   apply:
    runs-on: ubuntu-latest
 
+   env:
+    TF_VAR_DO_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
    steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -22,26 +25,44 @@ jobs:
         cli_config_credentials_token: ${{ secrets.TERRAFORM_CLOUD_API_TOKEN }}
     - name: Terraform Init
       id: init
-      run: terraform init
+      run: terraform init -input=false
     - name: Terraform Validate
       id: validate
       run: terraform validate -no-color
     - name: Terraform Plan
       id: plan
-      run: terraform plan -no-color
+      run: terraform plan -no-color -input=false
       continue-on-error: true
     - name: Terraform Apply
       id: apply
       if: steps.plan.outcome == 'success'
       run: terraform apply -auto-approve -input=false
+    - name: Terraform Output
+      id: output
+      if: steps.apply.outcome == 'success'
+      run: |
+        output=$(terraform output -no-color -json)
+        echo "::set-output name=output::$output"
+    - name: Set Required Outputs in Github Secrets
+      id: set-gh-secret
+      if: steps.output.outcome == 'success'
+      run: >-
+        live_url=$(echo '${{ steps.output.outputs.output }}' |
+            jq '.do_app.value.live_url')
+        gh secret set DIGITALOCEAN_APP_LIVE_URL --body "$live_url"
     - name: Generate Summary
       env:
         plan-output: "terraform\n${{ steps.plan.outputs.stdout }}"
+        apply-output: "terraform\n${{ steps.apply.outputs.stdout }}"
+        output-output: "terraform\n${{ steps.output.outputs.output }}"
       run: >-
         echo '
         ## Terraform Initialization ${{ steps.init.outcome }}\n
         ## Terraform Validation ${{ steps.validate.outcome }}\n
         ## Terraform Plan ${{ steps.plan.outcome }}\n
+        ## Terraform Apply ${{ steps.apply.outcome }}\n
+        ## Terraform Output ${{ steps.output.outcome }}\n
+        ## Set Required GitHub Secrets ${{ steps.set-gh-secret.outcome }}\n
 
         <details><summary>Show Plan</summary>
 
@@ -50,6 +71,18 @@ jobs:
         \`\`\`
 
         </details>
+
+        <details><summary>Show Apply</summary>
+
+        \`\`\`\n
+        ${{ env.apply-output }}
+        \`\`\`
+
+        </details>
+
+        \`\`\`json\n
+        ${{ env.output-output }}
+        \`\`\`
 
         *Pushed by: @${{ github.actor }}, Action: ${{ github.event_name }}*
         '>> $GITHUB_STEP_SUMMARY
