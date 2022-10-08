@@ -46,9 +46,9 @@ jobs:
     - name: Set Required Outputs in Github Secrets
       id: set-gh-secret
       if: steps.output.outcome == 'success'
-      run: |
-        live_url=$(cat tf_output.json | jq '.do_app.value.live_url')
-        gh secret set DIGITALOCEAN_APP_LIVE_URL --body "$live_url"
+      run: >-
+        gh secret set DIGITALOCEAN_APP_LIVE_URL
+          --body "$(cat tf_output.json | jq '.do_app.value.live_url')"
     - name: Generate Summary
       env:
         plan-output: "terraform\n${{ steps.plan.outputs.stdout }}"
