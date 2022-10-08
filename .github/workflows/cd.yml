@@ -35,6 +35,8 @@ jobs:
       wd_or_wr: ${{ steps.env.outputs.wd_or_wr }}
 
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
     - uses: dorny/paths-filter@v2
       id: filter
       with:
@@ -63,7 +65,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: DO App Platform (Functions) deployment
         uses: digitalocean/app_action@v1.1.4
         with:
@@ -86,7 +88,7 @@ jobs:
 
     steps:
       - name: Checkout site code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Node
         uses: actions/setup-node@v3
         with:

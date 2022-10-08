@@ -18,7 +18,7 @@ jobs:
 
    steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Setup Terrform CLI
       uses: hashicorp/setup-terraform@v2
       with:
@@ -42,14 +42,12 @@ jobs:
       id: output
       if: steps.apply.outcome == 'success'
       run: |
-        output=$(terraform output -no-color -json)
-        echo "::set-output name=output::$output"
+        terraform output -no-color -json > tf_output.json
     - name: Set Required Outputs in Github Secrets
       id: set-gh-secret
       if: steps.output.outcome == 'success'
-      run: >-
-        live_url=$(echo '${{ steps.output.outputs.output }}' |
-            jq '.do_app.value.live_url')
+      run: |
+        live_url=$(cat tf_output.json | jq '.do_app.value.live_url')
         gh secret set DIGITALOCEAN_APP_LIVE_URL --body "$live_url"
     - name: Generate Summary
       env:
