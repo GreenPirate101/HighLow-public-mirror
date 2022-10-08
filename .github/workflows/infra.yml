@@ -9,6 +9,9 @@ on:
 jobs:
   apply:
    runs-on: ubuntu-latest
+   defaults:
+    run:
+      working-directory: terraform
 
    env:
     TF_VAR_DO_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
@@ -16,8 +19,6 @@ jobs:
    steps:
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Change Directory to terraform
-      run: cd terraform
     - name: Setup Terrform CLI
       uses: hashicorp/setup-terraform@v2
       with:
@@ -55,34 +56,34 @@ jobs:
         plan-output: "terraform\n${{ steps.plan.outputs.stdout }}"
         apply-output: "terraform\n${{ steps.apply.outputs.stdout }}"
         output-output: "terraform\n${{ steps.output.outputs.output }}"
-      run: >-
+      run: |
         echo '
-        ## Terraform Initialization ${{ steps.init.outcome }}\n
-        ## Terraform Validation ${{ steps.validate.outcome }}\n
-        ## Terraform Plan ${{ steps.plan.outcome }}\n
-        ## Terraform Apply ${{ steps.apply.outcome }}\n
-        ## Terraform Output ${{ steps.output.outcome }}\n
-        ## Set Required GitHub Secrets ${{ steps.set-gh-secret.outcome }}\n
+        ## Terraform Initialization ${{ steps.init.outcome }}
+        ## Terraform Validation ${{ steps.validate.outcome }}
+        ## Terraform Plan ${{ steps.plan.outcome }}
+        ## Terraform Apply ${{ steps.apply.outcome }}
+        ## Terraform Output ${{ steps.output.outcome }}
+        ## Set Required GitHub Secrets ${{ steps.set-gh-secret.outcome }}
 
         <details><summary>Show Plan</summary>
 
-        \`\`\`\n
+        ```
         ${{ env.plan-output }}
-        \`\`\`
+        ```
 
         </details>
 
         <details><summary>Show Apply</summary>
 
-        \`\`\`\n
+        ```
         ${{ env.apply-output }}
-        \`\`\`
+        ```
 
         </details>
 
-        \`\`\`json\n
+        ```json
         ${{ env.output-output }}
-        \`\`\`
+        ```
 
         *Pushed by: @${{ github.actor }}, Action: ${{ github.event_name }}*
         '>> $GITHUB_STEP_SUMMARY

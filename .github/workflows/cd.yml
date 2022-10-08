@@ -15,7 +15,8 @@ on:
       - completed
 
 env:
-  workflow_dispatch__or__workflow_run: |
+  # workflow_dispatch or workflow_run
+  wd_or_wr: |
     ${{ github.event_name == 'workflow_dispatch' }}
                       ||
     (
@@ -31,6 +32,7 @@ jobs:
     outputs:
       functions: ${{ steps.filter.outputs.functions }}
       site: ${{ steps.filter.outputs.site }}
+      wd_or_wr: ${{ steps.env.outputs.wd_or_wr }}
 
     steps:
     - uses: dorny/paths-filter@v2
@@ -43,6 +45,10 @@ jobs:
             - "project.yml"
           site:
             - "site/**"
+    - name: Set wd_or_wr var
+      id: env
+      run: |
+        echo "::set-output name=wd_or_wr::$wd_or_wr"
 
 
   deploy-DO-fn:
@@ -53,7 +59,7 @@ jobs:
     if: |
       ${{ needs.changes.outputs.functions == 'true' }}
                         ||
-      ${{ env.workflow_dispatch__or__workflow_run }}
+      ${{ needs.changes.outputs.wd_or_wr == 'true' }}
 
     steps:
       - name: Checkout code
@@ -73,7 +79,7 @@ jobs:
     if: |
       ${{ needs.changes.outputs.site == 'true' }}
                         ||
-      ${{ env.workflow_dispatch__or__workflow_run }}
+      ${{ needs.changes.outputs.wd_or_wr == 'true' }}
     env:
       VITE_FUNCTIONS_URL: ${{ secrets.DIGITALOCEAN_APP_LIVE_URL }}
       VITE_BASE: ${{ github.event.repository.name }}
