@@ -21,8 +21,8 @@ resource "digitalocean_app" "highlow" {
 
 output "do_app" {
   value = {
-    id                   = digitalocean_app.highlow.id
-    default_ingress      = digitalocean_app.highlow.default_ingress
-    live_url             = digitalocean_app.highlow.live_url
+    id              = digitalocean_app.highlow.id
+    default_ingress = digitalocean_app.highlow.default_ingress
+    live_url        = digitalocean_app.highlow.live_url
   }
 }
