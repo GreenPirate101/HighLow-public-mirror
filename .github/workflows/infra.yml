@@ -47,7 +47,7 @@ jobs:
       id: set-gh-secret
       if: steps.output.outcome == 'success'
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.GH_PAT }}
       run: >-
         gh secret set DIGITALOCEAN_APP_LIVE_URL
           --body "$(cat tf_output.json | jq '.do_app.value.live_url')"
