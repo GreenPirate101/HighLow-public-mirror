@@ -1,4 +1,4 @@
-module github.com/CyberCitizen01/HighLow/core
+module github.com/GreenPirate101/HighLow-public-mirror/core
 
 go 1.18
 
