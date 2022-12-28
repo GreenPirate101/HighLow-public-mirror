@@ -21,8 +21,8 @@ type UsersLoginArgsT struct {
 	Code string
 }
 
-func UsersLoginArgs(args map[string]string) (*UsersLoginArgsT, error) {
-	code, exist := args["code"]
+func UsersLoginArgs(args map[string]interface{}) (*UsersLoginArgsT, error) {
+	code, exist := args["code"].(string)
 	if !exist {
 		return nil, errors.New("invalid request: `code` is required")
 	}
